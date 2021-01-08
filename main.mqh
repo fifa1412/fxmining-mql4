@@ -60,6 +60,42 @@ class Main{
                   indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
                   value = RSI::buildValue(symbol,timeframe_int,indicator_settings_json);
                   total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
+                  
+                  // Update Moving Average 
+                  // [1/5] EMA5 PRICE_WEIGHTED
+                  indicator_name = "MA";
+                  indicator_settings_json = "[{\"period\":\"5\",\"apply_to\":\"PRICE_WEIGHTED\",\"method\":\"MODE_EMA\"}]";
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
+                  value = MA::buildValue(symbol,timeframe_int,indicator_settings_json);
+                  total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
+                  
+                  // [2/5] EMA21 PRICE_WEIGHTED
+                  indicator_name = "MA";
+                  indicator_settings_json = "[{\"period\":\"21\",\"apply_to\":\"PRICE_WEIGHTED\",\"method\":\"MODE_EMA\"}]";
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
+                  value = MA::buildValue(symbol,timeframe_int,indicator_settings_json);
+                  total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
+                  
+                  // [3/5] SMA50 PRICE_CLOSE
+                  indicator_name = "MA";
+                  indicator_settings_json = "[{\"period\":\"50\",\"apply_to\":\"PRICE_CLOSE\",\"method\":\"MODE_SMA\"}]";
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
+                  value = MA::buildValue(symbol,timeframe_int,indicator_settings_json);
+                  total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
+                  
+                  // [4/5] SMA100 PRICE_CLOSE
+                  indicator_name = "MA";
+                  indicator_settings_json = "[{\"period\":\"100\",\"apply_to\":\"PRICE_CLOSE\",\"method\":\"MODE_SMA\"}]";
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
+                  value = MA::buildValue(symbol,timeframe_int,indicator_settings_json);
+                  total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
+                  
+                  // [5/5] SMA200 PRICE_CLOSE
+                  indicator_name = "MA";
+                  indicator_settings_json = "[{\"period\":\"200\",\"apply_to\":\"PRICE_CLOSE\",\"method\":\"MODE_SMA\"}]";
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
+                  value = MA::buildValue(symbol,timeframe_int,indicator_settings_json);
+                  total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
                       
                   //API::systemUpsertIndicatorData(symbol,timeframe,indicator_name,indicator_settings,value); // single insert (deprecated cuz too slow.)
                   
