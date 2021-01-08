@@ -9,13 +9,23 @@
 #include "formatter.mqh"
 #include "JAson.mqh"
 
-class ADX{
-   public: 
-      static string buildJSONSettings(string indicator_settings){
+class Indicator{
+   public:
+      static string buildJSONSettings(string indicator_name,string indicator_settings){
          CJAVal json;
          json.Deserialize(indicator_settings);
-         return "{\"period\":"+json[0]["period"].ToStr()+",\"apply_to\":\""+json[0]["apply_to"].ToStr()+"\"}";
+         if(indicator_name == "ADX" || indicator_name == "CCI" || indicator_name == "RSI"){
+            return "{\"period\":"+json[0]["period"].ToStr()+",\"apply_to\":\""+json[0]["apply_to"].ToStr()+"\"}";
+         }else if(indicator_name == "STOCHASTIC"){
+            return "{\"k_period\":"+json[0]["k_period"].ToStr()+",\"d_period\":"+json[0]["d_period"].ToStr()+",\"slowing\":"+json[0]["slowing"].ToStr()+",\"price_field\":\""+json[0]["price_field"].ToStr()+"\",\"method\":\""+json[0]["method"].ToStr()+"\"}";
+         }else{
+            return "";
+         } 
       }
+};
+
+class ADX{
+   public: 
       static string buildValue(string symbol,int timeframe_int,string indicator_settings){
          CJAVal json;
          json.Deserialize(indicator_settings);
@@ -30,11 +40,6 @@ class ADX{
 
 class Stochastic{
    public:
-      static string buildJSONSettings(string indicator_settings){
-         CJAVal json;
-         json.Deserialize(indicator_settings);
-         return "{\"k_period\":"+json[0]["k_period"].ToStr()+",\"d_period\":"+json[0]["d_period"].ToStr()+",\"slowing\":"+json[0]["slowing"].ToStr()+",\"price_field\":\""+json[0]["price_field"].ToStr()+"\",\"method\":\""+json[0]["method"].ToStr()+"\"}";
-      }
       static string buildValue(string symbol,int timeframe_int ,string indicator_settings){
          CJAVal json;
          json.Deserialize(indicator_settings);
@@ -52,11 +57,6 @@ class Stochastic{
 
 class CCI{
    public:
-      static string buildJSONSettings(string indicator_settings){
-         CJAVal json;
-         json.Deserialize(indicator_settings);
-         return "{\"period\":"+json[0]["period"].ToStr()+",\"apply_to\":\""+json[0]["apply_to"].ToStr()+"\"}";
-      }
       static string buildValue(string symbol,int timeframe_int,string indicator_settings){
          CJAVal json;
          json.Deserialize(indicator_settings);
@@ -64,6 +64,19 @@ class CCI{
          int apply_to_int = Formatter::getApplyPriceInt(json[0]["apply_to"].ToStr());
          double icci = iCCI(symbol,timeframe_int,period,apply_to_int,0);    
          return "{\"main_value\":"+(string)icci+"}";
+      }
+     
+};
+
+class RSI{
+   public:
+      static string buildValue(string symbol,int timeframe_int,string indicator_settings){
+         CJAVal json;
+         json.Deserialize(indicator_settings);
+         int period = (int)json[0]["period"].ToStr();
+         int apply_to_int = Formatter::getApplyPriceInt(json[0]["apply_to"].ToStr());
+         double irsi = iRSI(symbol,timeframe_int,period,apply_to_int,0);    
+         return "{\"main_value\":"+(string)irsi+"}";
       }
      
 };

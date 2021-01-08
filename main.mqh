@@ -33,7 +33,7 @@ class Main{
                   // Update ADX //
                   indicator_name = "ADX";
                   indicator_settings_json = "[{\"period\":\"14\",\"apply_to\":\"PRICE_CLOSE\"}]";
-                  indicator_settings = ADX::buildJSONSettings(indicator_settings_json);
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
                   value = ADX::buildValue(symbol,timeframe_int,indicator_settings_json);
                   total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
                   
@@ -41,7 +41,7 @@ class Main{
                   // Update Stochastic // 
                   indicator_name = "STOCHASTIC";
                   indicator_settings_json = "[{\"k_period\":\"5\",\"d_period\":\"3\",\"slowing\":\"3\",\"price_field\":\"LOW_HIGH\",\"method\":\"MODE_SMA\"}]";
-                  indicator_settings = Stochastic::buildJSONSettings(indicator_settings_json);
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
                   value = Stochastic::buildValue(symbol,timeframe_int,indicator_settings_json);
                   total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
                   
@@ -49,8 +49,16 @@ class Main{
                   // Update CCI
                   indicator_name = "CCI";
                   indicator_settings_json = "[{\"period\":\"14\",\"apply_to\":\"PRICE_CLOSE\"}]";
-                  indicator_settings = CCI::buildJSONSettings(indicator_settings_json);
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
                   value = CCI::buildValue(symbol,timeframe_int,indicator_settings_json);
+                  total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
+                  
+                  
+                  // Update RSI
+                  indicator_name = "RSI";
+                  indicator_settings_json = "[{\"period\":\"14\",\"apply_to\":\"PRICE_CLOSE\"}]";
+                  indicator_settings = Indicator::buildJSONSettings(indicator_name, indicator_settings_json);
+                  value = RSI::buildValue(symbol,timeframe_int,indicator_settings_json);
                   total_params = API::appendOrSendParams(total_params, symbol, timeframe, indicator_name, indicator_settings, value);
                       
                   //API::systemUpsertIndicatorData(symbol,timeframe,indicator_name,indicator_settings,value); // single insert (deprecated cuz too slow.)
