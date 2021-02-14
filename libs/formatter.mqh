@@ -21,6 +21,14 @@ class Formatter{
          else                   return 0;
       }
       
+      static string fJSON(string name, string value){
+         return "\""+name+"\":\""+(string)value+"\"";
+      }
+      
+      static string fJSONObj(string name, string value){
+         return "\""+name+"\":"+(string)value;
+      }
+      
       static int getMAMethodsInt(string methods){
          if(methods == "MODE_SMA")        return 0;
          else if(methods == "MODE_EMA")   return 1;

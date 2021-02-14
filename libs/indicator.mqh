@@ -6,8 +6,26 @@
 #property copyright "Copyright 2021, PKONEZ Software Corp."
 #property strict
 
-#include "formatter.mqh"
 #include "JAson.mqh"
+
+class Symbol{
+   public:
+      static string buildValue(double price_bid, double price_ask,double swap_long,double swap_short, double spread, 
+         double today_adr, double adr_1, double adr_5, double adr_10, double adr_20,bool trade_allowed){
+         return "{\"price_bid\":"+(string)price_bid
+         +",\"price_ask\":"+(string)price_ask
+         +",\"swap_long\":"+(string)swap_long
+         +",\"swap_short\":"+(string)swap_short
+         +",\"spread\":"+(string)spread
+         +",\"today_adr\":"+(string)today_adr
+         +",\"adr_1\":"+(string)adr_1
+         +",\"adr_5\":"+(string)adr_5
+         +",\"adr_10\":"+(string)adr_10
+         +",\"adr_20\":"+(string)adr_20
+         +",\"trade_allowed\":"+(string)trade_allowed
+         +"}";
+      }
+};
 
 class Indicator{
    public:
@@ -23,6 +41,17 @@ class Indicator{
          }else{
             return "";
          } 
+      }
+};
+
+class ADR{
+   public:
+      static double calculateADR(string symbol, int day){
+         double adr_sum = 0;
+         for(int i=1;i<=day;i++){
+            adr_sum+=(iHigh(symbol,PERIOD_D1,i)-iLow(symbol,PERIOD_D1,i))*MathPow(10,MarketInfo(symbol,MODE_DIGITS));
+         }
+         return adr_sum/day;
       }
 };
 
