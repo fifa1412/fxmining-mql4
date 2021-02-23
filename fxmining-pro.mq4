@@ -34,6 +34,7 @@ int OnInit(){
       Main::updateSymbolData(forex_pair);
       Main::updateIndicatorData(forex_pair, tf_list);
       Main::updateActiveOrderData();
+      Main::checkRequestOrder();
       Sleep(5000);
    }   
    

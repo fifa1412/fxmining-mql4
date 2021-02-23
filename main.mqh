@@ -12,6 +12,58 @@
 
 class Main{
    public:
+         static void checkRequestOrder(){
+            string url = ENV::getConfig("API_SERVER_URL") + "api/Expert/systemGetRequestOrderList";
+            string total_params = "[{}]";
+            string res = API::callAPIWithResponse(url,total_params);
+            CJAVal json;
+            json.Deserialize(res);
+            
+            // Start If Response Success.
+            if(json["status"]["code"] == 200){
+               // Loop Execute Each Request Order //
+               int total_order = (int)json["data"]["count"].ToInt();
+               for(int ii=0;ii<total_order;ii++){
+                  string symbol = json["data"]["order_list"][ii]["symbol"].ToStr();
+                  string type = json["data"]["order_list"][ii]["type"].ToStr();
+                  double lot = json["data"]["order_list"][ii]["lot"].ToDbl();
+                  string order_id = json["data"]["order_list"][ii]["order_id"].ToStr();
+                  string comment = "[id:"+order_id+"]";
+                  int is_success = OrderSend(symbol,Formatter::getOrderPropInt(type),lot,Bid,300000,0,0,comment,0,0,clrNONE);
+                  if(is_success < 0){
+                     string is_trade_allow = "";
+                     if(IsTradeAllowed()==false){
+                        is_trade_allow = " => AutoTrading Disabled";
+                     }
+                     printf("Cannot Execute Order: " + type + " " + symbol + " " + (string)lot + " " + comment + is_trade_allow);
+                     // Send Failed Open Order Count => future
+                     
+                  }
+                  else{
+                     Print("Execute Order: " + type + " " + symbol + " " + (string)lot + " " + comment + " => Success.");
+                     Main::updateOrderStatus(order_id,"done");
+                  }
+               }
+            } // End If Response Success.
+         }
+         
+         static void updateOrderStatus(string order_id, string status){
+            string url = ENV::getConfig("API_SERVER_URL") + "api/Expert/systemUpdateOrderStatus";
+            string total_params = "[{\"order_id\":\""+order_id+"\",\"status\":\""+status+"\"}]";
+            string res = API::callAPIWithResponse(url,total_params);
+            CJAVal json;
+            json.Deserialize(res);
+            
+            printf(res);
+            
+            if(json["status"]["code"] == 200){
+               // Nothing To Do //
+               printf("systemUpdateOrderStatus: " + json["status"]["description"].ToStr());
+            }else{
+               printf("systemUpdateOrderStatus: " + json["status"]["description"].ToStr());
+            }
+         }
+         
          static void updateSymbolData(string& forex_pair[]){
             string symbol = "";
             string total_params = "";
@@ -22,6 +74,9 @@ class Main{
             double spread = 0;
             double today_adr,adr_1,adr_5,adr_10,adr_20 = 0;
             bool trade_allowed = false;
+            double digits = 0;
+            datetime server_time;
+            string server_name = "";
             string value = "";
     
             for(int i=0;i<ArraySize(forex_pair);i++){
@@ -37,9 +92,12 @@ class Main{
                adr_10 = ADR::calculateADR(symbol,10);
                adr_20 = ADR::calculateADR(symbol,20);
                trade_allowed = MarketInfo(symbol, MODE_TRADEALLOWED);
+               digits = MarketInfo(symbol,MODE_DIGITS);
+               server_name = AccountServer();
+               server_time = TimeCurrent();
                  
                value = Symbol::buildValue(price_bid,price_ask,swap_long,swap_short,spread
-                  ,today_adr,adr_1,adr_5,adr_10,adr_20,trade_allowed);
+                  ,today_adr,adr_1,adr_5,adr_10,adr_20,trade_allowed,digits,server_name,server_time);
                total_params = API::appendParamsSymbol(total_params, symbol, value);
             }
             API::systemUpsertSymbolDataList("["+total_params+"]");
@@ -61,6 +119,8 @@ class Main{
                      +","+Formatter::fJSON("symbol",(string)OrderSymbol())
                      +","+Formatter::fJSON("swap",(string)OrderSwap())
                      +","+Formatter::fJSON("profit",(string)OrderProfit())
+                     +","+Formatter::fJSON("open_price",(string)OrderOpenPrice())
+                     +","+Formatter::fJSON("current_price",(string)MarketInfo(OrderSymbol(),MODE_BID))
                      +"}";
                      
                   params = "{"+Formatter::fJSON("ticket",(string)OrderTicket())

@@ -11,18 +11,21 @@
 class Symbol{
    public:
       static string buildValue(double price_bid, double price_ask,double swap_long,double swap_short, double spread, 
-         double today_adr, double adr_1, double adr_5, double adr_10, double adr_20,bool trade_allowed){
-         return "{\"price_bid\":"+(string)price_bid
-         +",\"price_ask\":"+(string)price_ask
-         +",\"swap_long\":"+(string)swap_long
-         +",\"swap_short\":"+(string)swap_short
-         +",\"spread\":"+(string)spread
-         +",\"today_adr\":"+(string)today_adr
-         +",\"adr_1\":"+(string)adr_1
-         +",\"adr_5\":"+(string)adr_5
-         +",\"adr_10\":"+(string)adr_10
-         +",\"adr_20\":"+(string)adr_20
-         +",\"trade_allowed\":"+(string)trade_allowed
+         double today_adr, double adr_1, double adr_5, double adr_10, double adr_20,bool trade_allowed, double digits, string server_name, datetime server_time){
+         return "{\"price_bid\":\""+(string)price_bid+"\""
+         +",\"price_ask\":\""+(string)price_ask+"\""
+         +",\"swap_long\":\""+(string)swap_long+"\""
+         +",\"swap_short\":\""+(string)swap_short+"\""
+         +",\"spread\":\""+(string)spread+"\""
+         +",\"today_adr\":\""+(string)today_adr+"\""
+         +",\"adr_1\":\""+(string)adr_1+"\""
+         +",\"adr_5\":\""+(string)adr_5+"\""
+         +",\"adr_10\":\""+(string)adr_10+"\""
+         +",\"adr_20\":\""+(string)adr_20+"\""
+         +",\"trade_allowed\":\""+(string)trade_allowed+"\""
+         +",\"digits\":\""+(string)digits+"\""
+         +",\"server_name\":\""+(string)server_name+"\""
+         +",\"server_time\":\""+(string)server_time+"\""
          +"}";
       }
 };
@@ -120,7 +123,8 @@ class MA{
          int period = (int)json[0]["period"].ToStr();
          int method = Formatter::getMAMethodsInt(json[0]["method"].ToStr());
          int apply_to_int = Formatter::getApplyPriceInt(json[0]["apply_to"].ToStr());
-         double ima = iMA(symbol,timeframe_int,period,0,method,apply_to_int,0);    
+         double digits = MarketInfo(symbol,MODE_DIGITS);
+         double ima = NormalizeDouble(iMA(symbol,timeframe_int,period,0,method,apply_to_int,0),(int)digits);
          return "{\"main_value\":"+(string)ima+"}";
       }
 };

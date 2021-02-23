@@ -43,6 +43,12 @@ class Formatter{
          else                                return 99;
       }
       
+      static int getOrderPropInt(string op){
+         if(op == "BUY")            return 0;
+         else if(op == "SELL")      return 1;
+         else                       return 99;
+      }
+      
       static int getApplyPriceInt(string apply_to){
          if(apply_to == "PRICE_CLOSE")          return 0;
          else if(apply_to == "PRICE_OPEN")      return 1;

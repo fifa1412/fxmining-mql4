@@ -65,6 +65,20 @@ class API{
          }
       }
       
+      static string callAPIWithResponse(string strUrl,string total_params) {
+          string headers;  
+          char post[],result[];
+            
+          string strJsonText = "total_params="+total_params;
+          uchar jsonData[];
+          StringToCharArray(strJsonText, jsonData, 0, StringLen(strJsonText));
+            
+          int timeout = 5000;
+          int res_code = WebRequest("POST",strUrl,"","",timeout,jsonData,ArraySize(jsonData),result,headers);
+            
+          return CharArrayToString(result);
+      }
+      
       static void sendDataToAPI(string url,string total_params){
          API::callAPI(ENV::getConfig("API_SERVER_URL") + url,"["+total_params+"]");
       }
