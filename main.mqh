@@ -16,6 +16,7 @@ class Main{
             string url = ENV::getConfig("API_SERVER_URL") + "api/Expert/systemGetRequestOrderList";
             string total_params = "[{}]";
             string res = API::callAPIWithResponse(url,total_params);
+            int slippage = 3;
             CJAVal json;
             json.Deserialize(res);
             
@@ -24,37 +25,52 @@ class Main{
                // Loop Execute Each Request Order //
                int total_order = (int)json["data"]["count"].ToInt();
                for(int ii=0;ii<total_order;ii++){
+                  string status = json["data"]["order_list"][ii]["status"].ToStr();
                   string symbol = json["data"]["order_list"][ii]["symbol"].ToStr();
                   string type = json["data"]["order_list"][ii]["type"].ToStr();
                   double lot = json["data"]["order_list"][ii]["lot"].ToDbl();
                   string order_id = json["data"]["order_list"][ii]["order_id"].ToStr();
-                  string comment = "[id:"+order_id+"]";
-                  int is_success = OrderSend(symbol,Formatter::getOrderPropInt(type),lot,Bid,300000,0,0,comment,0,0,clrNONE);
-                  if(is_success < 0){
-                     string is_trade_allow = "";
-                     if(IsTradeAllowed()==false){
-                        is_trade_allow = " => AutoTrading Disabled";
+                  string order_group_id = json["data"]["order_list"][ii]["order_group_id"].ToStr();
+                  string comment = "s:apt,gid:"+order_group_id+",id:"+order_id;
+                  
+                  if(status=="request_open"){
+                     int order_ticket = 0;
+                     if(type=="BUY"){
+                        order_ticket = OrderSend(symbol,OP_BUY,lot,NormalizeDouble(Ask,MarketInfo(symbol,MODE_DIGITS)),slippage,0,0,comment,0,0,clrNONE);
+                     }else{
+                        order_ticket = OrderSend(symbol,OP_SELL,lot,NormalizeDouble(Bid,MarketInfo(symbol,MODE_DIGITS)),slippage,0,0,comment,0,0,clrNONE);   
                      }
-                     printf("Cannot Execute Order: " + type + " " + symbol + " " + (string)lot + " " + comment + is_trade_allow);
-                     // Send Failed Open Order Count => future
+                     if(order_ticket < 0){
+                        string is_trade_allow = "";  //s:apt,gid:puWa,id:apuWa
+                        if(IsTradeAllowed()==false){is_trade_allow = " => AutoTrading Disabled";}
+                        printf("Cannot Execute Order: " + type + " " + symbol + " " + (string)lot + " " + comment + is_trade_allow);
+                        // Send Failed Open Order Count => future  
+                     }
+                     else{
+                        Print("Execute Order: " + type + " " + symbol + " " + (string)lot + " " + comment + " => Success. (Ticket: "+(string)order_ticket+")");
+                        Main::updateOrderStatus(order_id,order_ticket,"opened");
+                     }
                      
-                  }
-                  else{
-                     Print("Execute Order: " + type + " " + symbol + " " + (string)lot + " " + comment + " => Success.");
-                     Main::updateOrderStatus(order_id,"done");
+                  }else if(status=="request_close"){
+                     int order_ticket = (int)json["data"]["order_list"][ii]["order_ticket"].ToStr();
+                     if(OrderSelect(order_ticket,SELECT_BY_TICKET)){
+                        if(!OrderClose(OrderTicket(),OrderLots(),OrderClosePrice(),slippage,clrNONE)){
+                           Print("Error Closing Order (Ticket: "+(string)order_ticket+")");
+                        }else{
+                           Main::updateOrderStatus(order_id,order_ticket,"closed");
+                        }
+                     }
                   }
                }
-            } // End If Response Success.
+            }
          }
          
-         static void updateOrderStatus(string order_id, string status){
+         static void updateOrderStatus(string order_id,int order_ticket,string status){
             string url = ENV::getConfig("API_SERVER_URL") + "api/Expert/systemUpdateOrderStatus";
-            string total_params = "[{\"order_id\":\""+order_id+"\",\"status\":\""+status+"\"}]";
+            string total_params = "[{\"order_id\":\""+order_id+"\",\"order_ticket\":\""+(string)order_ticket+"\",\"status\":\""+status+"\"}]";
             string res = API::callAPIWithResponse(url,total_params);
             CJAVal json;
             json.Deserialize(res);
-            
-            printf(res);
             
             if(json["status"]["code"] == 200){
                // Nothing To Do //
@@ -121,6 +137,7 @@ class Main{
                      +","+Formatter::fJSON("profit",(string)OrderProfit())
                      +","+Formatter::fJSON("open_price",(string)OrderOpenPrice())
                      +","+Formatter::fJSON("current_price",(string)MarketInfo(OrderSymbol(),MODE_BID))
+                     +","+Formatter::fJSON("comment",(string)OrderComment())
                      +"}";
                      
                   params = "{"+Formatter::fJSON("ticket",(string)OrderTicket())
