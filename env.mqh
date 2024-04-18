@@ -8,7 +8,7 @@
 
 class ENV{
    public:
-        static void getConfig(string configName){
+        static string getConfig(string configName){
             if(configName == "API_SERVER_URL"){
                 return "https://45.154.24.224:8000/"; // ReadyIDC VM //
             }else{
