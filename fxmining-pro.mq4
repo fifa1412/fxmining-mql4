@@ -11,6 +11,11 @@
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 
+// Disclaimer: How to run this EA
+// 1. Run API on port 80: php artisan serve --port=80
+// 2. Go to setting in Metatrader: Tools -> Options -> Expert Advisors
+// 3. Allow WebRequest for listed URL: => http://127.0.0.1
+
 #include "main.mqh"
 #include "env.mqh"
 
